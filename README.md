@@ -15,9 +15,11 @@ Each task gives an agent one real public record (a vulnerability advisory, a tri
 ## Install
 
 ```bash
-pip install -e .            # the package and the suffice command
-pip install -e .[dev]       # plus pytest, datasets, huggingface_hub
+pip install .               # the package and the suffice command
+pip install ".[dev]"        # plus pytest, datasets, huggingface_hub
 ```
+
+Add `-e` for an editable install, which needs pip 21.3 or later. Nothing has to be installed to try the commands below from a checkout. Write `PYTHONPATH=src python3 -m suffice` in place of `suffice`.
 
 ## Use
 
@@ -36,11 +38,13 @@ print(score(tasks, predictions)["overall"])
 ```
 
 ```bash
-suffice evaluate --tasks data/balanced.jsonl --predictions predictions.jsonl --by domain --output results.json
-suffice validate --split heldout_balanced=data/balanced.jsonl --split heldout_natural=data/natural.jsonl
+suffice evaluate --tasks data/balanced.jsonl --predictions data/reference_predictions/qwen2.5-32b/prime_guided.jsonl --by domain
+suffice validate --split heldout_balanced=data/balanced.jsonl --split heldout_natural=data/natural.jsonl --split dev=data/dev.jsonl --split val=data/val.jsonl
 suffice inspect --tasks data/balanced.jsonl sec-v2-0114 --labels
 suffice generate records -- --help
 ```
+
+The first command scores the paper's released PRIME run and prints 0.0% false authorization at utility 45.5, overall and by domain (`--output results.json` also saves the scores). The second checks the four splits of the primary corpus and ends with `OK`. To score your own agent, pass its predictions file to `--predictions`.
 
 Prediction format and endpoint definitions: [docs/evaluation_protocol.md](docs/evaluation_protocol.md). Row schema: [docs/data_schema.md](docs/data_schema.md). Examples in [examples/](examples/): load and inspect a task, evaluate a baseline agent, regenerate tasks.
 
